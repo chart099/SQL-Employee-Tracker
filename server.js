@@ -1,23 +1,16 @@
 const fs = require("fs");
 const inquirer = require("inquirer");
 
-const express = require('express');
 const mysql = require('mysql2');
-
-const PORT = process.env.PORT || 3001;
-const app = express();
-
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
 
 const db = mysql.createConnection(
     {
       host: 'localhost',
       user: 'root',
       password: 'root',
-      database: 'movies_db'
+      database: 'employment_db'
     },
-    console.log(`Connected to the movies_db database.`)
+    console.log(`Connected to the employment_db database.`)
   );
 
 inquirer 
@@ -44,8 +37,7 @@ inquirer
             query = "SELECT * FROM employees"
             break;
         case "add a department":
-            inquirer
-            .prompt ({
+            prompt ({
                     type: "input",
                     message: "enter name of new department",
                     name: "new_department"
@@ -55,8 +47,7 @@ inquirer
             )
             break;
         case "add a role":
-            inquirer
-            .prompt ({
+            prompt ({
                     type: "input",
                     message: "enter name of new role",
                     name: "new_role"
@@ -77,8 +68,7 @@ inquirer
             })
             break;
         case "add an employee":
-            inquirer 
-            .prompt ({
+            prompt ({
                 type: "input",
                 message: "enter first name of new employee",
                 name: "new_first_name",
@@ -99,8 +89,23 @@ inquirer
             .then ( (input) => {
                 query = `INSERT INTO roles (first_name, last_name, role, manager) VALUE ${input.new_first_name}, ${input.new_last_name}, ${input.new_em_role}, ${new_em_manager}`
             })
+            break;
+            case "update an employee role":
+                prompt ({
+                    type: "input",
+                    message: "enter last name of employee whose role needs updating",
+                    name: "em_role_change"
+                }, {
+                    type: "input",
+                    message: "enter new role",
+                    name: "em_updated_role"
+                })
+                then ( (input) => {
+                    query = `UPDATE employees SET role = ${em_updated_role} WHERE last_name = ${em_role_change}`
+                })
+                break;
     }
 
 })
 
-fs.writeFile()
+fs.writeFileSync("query.sql", query)
