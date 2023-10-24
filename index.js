@@ -2,27 +2,28 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 
-const db = mysql.createConnection(
-    {
-        host: 'localhost',
-        user: 'root',
-        password: 'root',
-        database: 'employment_db'
-    },
-    console.log(`Connected to the employment_db database.`)
-);
+// const db = mysql.createConnection(
+//     {
+//         host: 'localhost',
+//         user: 'root',
+//         password: 'root',
+//         database: 'employment_db'
+//     },
+//     console.log(`Connected to the employment_db database.`)
+// );
 
-function startFunction() {
-inquirer.prompt({
+// function startFunction() {
+let query;
+
+inquirer
+    .prompt([{
         type: "list",
         name: "userinput",
         message: "Select an option:  ",
         choices: ["view all departments", "view all roles", "view all employees", "add a department", "add a role", "add an employee", "update an employee role"],
        
-    })
+    }])
     .then(function (input) {
-        console.log(input);
-        let query;
         switch (input.choices) {
             case "view all departments":
                 query = "SELECT * FROM departments"
@@ -102,21 +103,11 @@ inquirer.prompt({
             })
             break;
             default:
-                console.log("Try again next time")
+                console.log(query)
                 break;
         }
 
     })
-}
-// db.query(query, function(err) => {
-//     console.log(err);
-// })
 
-// inquirer.prompt({
-//     type:"list",
-//     name:"userinput",
-//     message:"enter input",
-//     choices: ["yes","no"]
-// }).then(ans => console.log(ans))
 
-startFunction();
+    db.query(query);
