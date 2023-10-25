@@ -12,8 +12,6 @@ const db = mysql.createConnection(
     console.log(`Connected to the employment_db database.`)
 );
 
-
-
 let inputQuery;
 let changeTable;
 
@@ -42,7 +40,7 @@ inquirer
                 case "add a department":
                     inquirer.prompt({
                       type: "input",
-                      message: "Enter the name of the new department",
+                      message: "Enter the id of the new department",
                       name: "new_department"
                     }).then((input) => {
                       changeTable = `INSERT INTO departments (dept_name) VALUE ('${input.new_department}');`;
