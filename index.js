@@ -12,13 +12,10 @@ const db = mysql.createConnection(
     console.log(`Connected to the employment_db database.`)
 );
 
-function startItUp () {
-    db.query("Source ./db/schema.sql;")
-    db.query("Source ./db/seeds/sql;")
-}
 
 
 let inputQuery;
+let changeTable;
 
 inquirer
     .prompt([{
@@ -29,94 +26,119 @@ inquirer
        
     }])
     .then(function (input) {
-        switch (input.choices) {
+        switch (input.userinput) {
             case "view all departments":
                 inputQuery = "SELECT * FROM departments"
-                db.query(inputQuery, function (err, result) {
-                    res.json(result);
-                })
+                doQuery()
                 break;
             case "view all roles":
                 inputQuery = "SELECT * FROM roles"
+                doQuery()
                 break;
             case "view all employees":
                 inputQuery = "SELECT * FROM employees"
+                doQuery()
                 break;
-            case "add a department":
-                inquirer.prompt ({
+                case "add a department":
+                    inquirer.prompt({
+                      type: "input",
+                      message: "Enter the name of the new department",
+                      name: "new_department"
+                    }).then((input) => {
+                      changeTable = `INSERT INTO departments (dept_name) VALUE ('${input.new_department}');`;
+                      inputQuery = "SELECT * FROM departments";
+                      addToQuery();
+                      doQuery();
+                    });
+                    break;
+                case "add a role":
+                    inquirer.prompt([
+                        {
                         type: "input",
-                        message: "enter name of new department",
-                        name: "new_department"
-                    } )
-                .then( (input) =>
-                inputQuery = `INSERT INTO departments (dept_name) VALUE ${input.new_department}`
-                )
-                break;
-            case "add a role":
-                inquirer.prompt ({
-                        type: "input",
-                        message: "enter name of new role",
+                        message: "Enter the name of the new role",
                         name: "new_role"
-                    },
-                    {
+                        },
+                        {
                         type: "input",
-                        message: "enter salary of new role",
+                        message: "Enter the salary of the new role",
                         name: "new_role_salary"
+                        },
+                        {
+                        type: "input",
+                        message: "Enter the department of the new role",
+                        name: "new_role_department"
+                        }
+                    ]).then((input) => {
+                        changeTable = `INSERT INTO roles (title, salary, department) VALUES ('${input.new_role}', ${input.new_role_salary}, '${input.new_role_department}')`;
+                        inputQuery = "SELECT * FROM roles";
+                        addToQuery();
+                        doQuery();
+                    });
+                    break;
+            case "add an employee":
+                inquirer.prompt([
+                    {
+                      type: "input",
+                      message: "Enter the first name of the new employee",
+                      name: "new_first_name"
                     },
                     {
-                        type: "input",
-                        message: "enter department of new role",
-                        name: "new_role_department"
+                      type: "input",
+                      message: "Enter the last name of the new employee",
+                      name: "new_last_name"
+                    },
+                    {
+                      type: "input",
+                      message: "Enter the role of the new employee",
+                      name: "new_em_role"
+                    },
+                    {
+                      type: "input",
+                      message: "Enter the manager of the new employee",
+                      name: "new_em_manager"
                     }
-                    )
-                .then ( (input) => {
-                    inputQuery = `INSERT INTO roles (title, salary, department) VALUE ${input.new_role}, ${input.new_role_salary}, ${input.new_role_department}`
-                })
-                break;
-            case "add an employee":
-                prompt ({
-                    type: "input",
-                    message: "enter first name of new employee",
-                    name: "new_first_name",
-                },{
-                    type: "input",
-                    message: "enter last name of new employee",
-                    name: "new_last_name",
-                }, {
-                    type: "input",
-                    message: "enter role of new employee",
-                    name: "new_em_role",
-                } ,{
-                    type: "input",
-                    message: "enter manager of new employee",
-                    name: "new_em_manager",
-                }
-                )
-                .then ( (input) => {
-                    query = `INSERT INTO roles (first_name, last_name, role, manager) VALUE ${input.new_first_name}, ${input.new_last_name}, ${input.new_em_role}, ${new_em_manager}`
-                })
-                break;
+                  ]).then((input) => {
+                    changeTable = `INSERT INTO employees (first_name, last_name, role, manager) VALUES ('${input.new_first_name}', '${input.new_last_name}', '${input.new_em_role}', '${input.new_em_manager}')`;
+                    inputQuery = "SELECT * FROM employees"
+                    addToQuery();
+                    doQuery();
+                  });
+                  break;
                 case "update an employee role":
-            inquirer.prompt ({
-                type: "input",
-                message: "enter last name of employee whose role needs updating",
-                name: "em_role_change"
-            }, {
-                type: "input",
-                message: "enter new role",
-                name: "em_updated_role"
-            })
-            then ( (input) => {
-                inputQuery = `UPDATE employees SET role = ${em_updated_role} WHERE last_name = ${em_role_change}`
-            })
-            break;
+                    inquirer.prompt ({
+                        type: "input",
+                        message: "enter last name of employee whose role needs updating",
+                        name: "em_role_change"
+                    }, {
+                        type: "input",
+                        message: "enter new role",
+                        name: "em_updated_role"
+                    })
+                    .then ( (input) => {
+                        changeTable = `UPDATE employees SET role = ${em_updated_role} WHERE last_name = ${em_role_change}`;
+                        inputQuery = "SELECT * FROM employees";
+                        addToQuery();
+                        doQuery();
+                    })
+                    break;
             default:
-                console.log(inputQuery)
+                console.log("Something went wrong")
                 break;
         }
 
     })
 
 
-    startItUp();
-    
+   function doQuery() {
+    db.query(inputQuery, function (err, results) {
+        console.table(results);
+    })
+   }
+
+   function addToQuery() {
+    db.query(changeTable, function (err, results) {
+        if (err) {
+            console.log(err)
+        }
+    })
+   }
