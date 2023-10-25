@@ -2,18 +2,23 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 
-// const db = mysql.createConnection(
-//     {
-//         host: 'localhost',
-//         user: 'root',
-//         password: 'root',
-//         database: 'employment_db'
-//     },
-//     console.log(`Connected to the employment_db database.`)
-// );
+const db = mysql.createConnection(
+    {
+        host: 'localhost',
+        user: 'root',
+        password: 'root',
+        database: 'employment_db'
+    },
+    console.log(`Connected to the employment_db database.`)
+);
 
-// function startFunction() {
-let query;
+function startItUp () {
+    db.query("Source ./db/schema.sql;")
+    db.query("Source ./db/seeds/sql;")
+}
+
+
+let inputQuery;
 
 inquirer
     .prompt([{
@@ -26,13 +31,16 @@ inquirer
     .then(function (input) {
         switch (input.choices) {
             case "view all departments":
-                query = "SELECT * FROM departments"
+                inputQuery = "SELECT * FROM departments"
+                db.query(inputQuery, function (err, result) {
+                    res.json(result);
+                })
                 break;
             case "view all roles":
-                query = "SELECT * FROM roles"
+                inputQuery = "SELECT * FROM roles"
                 break;
             case "view all employees":
-                query = "SELECT * FROM employees"
+                inputQuery = "SELECT * FROM employees"
                 break;
             case "add a department":
                 inquirer.prompt ({
@@ -41,7 +49,7 @@ inquirer
                         name: "new_department"
                     } )
                 .then( (input) =>
-                    query = `INSERT INTO departments (dept_name) VALUE ${input.new_department}`
+                inputQuery = `INSERT INTO departments (dept_name) VALUE ${input.new_department}`
                 )
                 break;
             case "add a role":
@@ -62,7 +70,7 @@ inquirer
                     }
                     )
                 .then ( (input) => {
-                    query = `INSERT INTO roles (title, salary, department) VALUE ${input.new_role}, ${input.new_role_salary}, ${input.new_role_department}`
+                    inputQuery = `INSERT INTO roles (title, salary, department) VALUE ${input.new_role}, ${input.new_role_salary}, ${input.new_role_department}`
                 })
                 break;
             case "add an employee":
@@ -99,15 +107,16 @@ inquirer
                 name: "em_updated_role"
             })
             then ( (input) => {
-                query = `UPDATE employees SET role = ${em_updated_role} WHERE last_name = ${em_role_change}`
+                inputQuery = `UPDATE employees SET role = ${em_updated_role} WHERE last_name = ${em_role_change}`
             })
             break;
             default:
-                console.log(query)
+                console.log(inputQuery)
                 break;
         }
 
     })
 
 
-    db.query(query);
+    startItUp();
+    
